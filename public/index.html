@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Message Board View</title>
+
+    <style>
+        .urgent-row {
+            background-color: red;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Message Board</h1>
+    <p><a href="form.html">Add New Message</a></p>
+
+    <table border="1" cellpadding="10">
+        <theard>
+            <tr>
+                <th>Name</th>
+                <th>Message</th>
+                <th>Action</th>
+                <th>Category</th>
+            </tr>
+        </theard>
+        <tbody id="dataTable"></tbody>
+    </table>
+
+
+    <script>
+        async function loadMessages() {
+            const response = await fetch('/api/messages');
+            const data = await response.json();
+            const tableBody = document.getElementById('dataTable');
+
+            tableBody.innerHTML = '';
+
+            // MOVE THE URGENT LOGIC HERE
+            data.forEach((item, index) => {
+                // Check if urgent
+                const rowClass = item.category === 'urgent' ? 'class="urgent-row"' : '';
+
+                const rowHTML = `
+                <tr ${rowClass}>
+                    <td>${item.name}</td>
+                    <td>${item.message}</td>
+                    <td><button onclick="deleteMessage(${index})">Delete</button></td>
+                    <td>${item.category || 'N/A'}</td>
+                </tr> 
+            `;
+                tableBody.innerHTML += rowHTML;
+            });
+        }
+
+        async function deleteMessage(index) {
+            await fetch(`/api/messages/${index}`, { method: 'DELETE' });
+            loadMessages();
+        }
+
+        loadMessages();
+    </script>
+</body>
+
+</html>
